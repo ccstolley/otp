@@ -76,7 +76,7 @@ static const char *
 get_token_from_file(const char *filename) {
     FILE *tokenfile;
     char path_buf[PATH_MAX];
-    char buf[964];
+    char buf[512];
     size_t byte_count;
 
     bzero(buf, sizeof(buf));
