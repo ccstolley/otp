@@ -2,6 +2,7 @@
 #include <unistd.h>
 #include <ctype.h>
 #include <errno.h>
+#include <sys/stat.h>
 
 #include <openssl/hmac.h>
 
@@ -71,6 +72,18 @@ trim(char *s) {
     *(e + 1) = '\0';
 }
 
+static void
+check_perms(const char *path) {
+    struct stat sb;
+
+    if (stat(path, &sb) == -1) {
+        bail("Unable to stat token file:");
+    }
+    if ((sb.st_mode & S_IRWXG) || (sb.st_mode & S_IRWXO)) {
+        bail("token file must be readable by owner only");
+    }
+}
+
 static const char *
 get_token_from_file(const char *filename) {
     FILE *tokenfile;
@@ -86,15 +99,16 @@ get_token_from_file(const char *filename) {
     } else {
         strncpy(path_buf, filename, PATH_MAX);
     }
+    check_perms(path_buf);
     tokenfile = fopen(path_buf, "r");
     if (!tokenfile) {
         fprintf(stderr, "bad token file: %s\n", path_buf);
-        bail("can't open token file");
+        bail("can't open token file:");
     }
 
     byte_count = fread(buf, sizeof(char), sizeof(buf) - 1, tokenfile);
     if (!byte_count) {
-        bail("unable to read token file");
+        bail("unable to read token file:");
     }
     trim(buf);
     return strdup(buf);

@@ -13,6 +13,7 @@ How
 
 ```
 echo -n KM4TGS2RK5CTSQKTGBDECRCGHFATAU2G > tokens/footoken
+chmod 0600 tokens/footoken
 ```
 2. Run `otp footoken`
 3. Cut and paste, or pipe output to `xclip`.
