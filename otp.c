@@ -77,7 +77,7 @@ check_perms(const char *path) {
     struct stat sb;
 
     if (stat(path, &sb) == -1) {
-        bail("Unable to stat token file:");
+        bail(path);
     }
     if ((sb.st_mode & S_IRWXG) || (sb.st_mode & S_IRWXO)) {
         bail("token file must be readable by owner only");
@@ -124,7 +124,7 @@ int main(int argc, char *argv[])
     time_t now;
 
     if (argc < 2) {
-        bail("Must supply a token file");
+        bail("usage: otp [path/to/]tokenfile");
     }
 
     token = get_token_from_file(argv[1]);
