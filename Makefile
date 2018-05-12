@@ -4,7 +4,7 @@ PREFIX = /usr/local
 INCS =
 LIBS = -lcrypto
 
-DEFINES = -DVERSION=\"${VERSION}\" -DDEFAULT_TOKEN_PATH=\"/home/${USER}/software/otp/tokens\"
+DEFINES = -DVERSION=\"${VERSION}\" -DDEFAULT_TOKEN_PATH=\"${PWD}/tokens\"
 CFLAGS = -std=gnu99 -fstack-protector-all -fbounds-check -pedantic -Wall -Wextra ${INCS} ${DEFINES} -g
 LDFLAGS = ${LIBS}
 CC = gcc
@@ -17,7 +17,7 @@ all: otp
 .c.o:
 	${CC} -c ${CFLAGS} $<
 
-ircl: ${OBJ}
+otp: ${OBJ}
 	${CC} -o $@ ${LDFLAGS} ${OBJ} 
 
 clean:
