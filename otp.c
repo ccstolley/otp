@@ -10,42 +10,47 @@
  #define PATH_MAX 4096
 #endif
 
+typedef struct bytestring {
+    unsigned char bytes[1024];
+    size_t length;
+} bytestring;
+
 static void
 bail(const char *err) {
     fprintf(stderr, "ERROR:%s %s\n", err, (errno) ? strerror(errno) : "");
     exit(1);
 }
 
-static size_t 
-b32decode(const char *s, const size_t s_len, unsigned char *b, size_t b_len)
+static int
+b32decode(const char *encoded_str, bytestring *bs)
 {
-    size_t i;
+    size_t i, len = 0;
 
-    if (b_len < 5 * s_len / 8 + 1) {
-        bail("key too long");
-    }
-
-    bzero(b, b_len);
-    for (i = 0; i < s_len; i++) {
+    bzero(bs, sizeof(bytestring));
+    for (i = 0; encoded_str[i] != '\0' && i < sizeof(bs->bytes); i++) {
         unsigned char x;
-        if (isalpha(s[i])) {
-            x = toupper(s[i]) - 'A';
-        } else if (s[i] >= '2' && s[i] <= '7') {
-            x = s[i] - '2' + 26;
+        if (isalpha(encoded_str[i])) {
+            x = toupper(encoded_str[i]) - 'A';
+        } else if (encoded_str[i] >= '2' && encoded_str[i] <= '7') {
+            x = encoded_str[i] - '2' + 26;
         } else {
             return 0;
         }
-        b[5 * i / 8] |= (x << 3) >> (5*i % 8);
+        len = 5 * i / 8;
+        bs->bytes[len] |= (x << 3) >> (5*i % 8);
         if (5 * i % 8 >= 4) {
-            b[5 * i / 8 + 1] |= x << (3 + 8 - (5*i % 8));
+            len++;
+            bs->bytes[len] |= x << (3 + 8 - (5*i % 8));
         }
     }
-    return 5 * i / 8;
+    len++;
+    bs->length = len;
+    return 1;
 }
 
 static void 
 hotp(const unsigned char *sbytes, const size_t sbytes_len,
-     time_t movingFactor, char *code, size_t code_len)
+     const time_t movingFactor, char *code, const size_t code_len)
 {
     unsigned char data[8];
     int i, offset, bin_code, otp;
@@ -84,7 +89,7 @@ check_perms(const char *path) {
     }
 }
 
-static const char *
+static char *
 get_token_from_file(const char *filename) {
     FILE *tokenfile;
     char path_buf[PATH_MAX];
@@ -117,10 +122,9 @@ get_token_from_file(const char *filename) {
 
 int main(int argc, char *argv[])
 {
-    unsigned char sbytes[256];
-    size_t sbytes_len;
     char code[7];
-    const char *token;
+    char *token;
+    bytestring bs;
     time_t now;
 
     if (argc < 2) {
@@ -129,13 +133,15 @@ int main(int argc, char *argv[])
 
     token = get_token_from_file(argv[1]);
 
-    sbytes_len = b32decode(token, strlen(token), sbytes, sizeof(sbytes));
-    if (!sbytes_len) {
+    if (! b32decode(token, &bs)) {
+        free(token);
         bail("unable to decode token");
     }
 
+    free(token);
+
     now = time(NULL);
-    hotp(sbytes, sbytes_len, now / 30, code, sizeof(code));
+    hotp(bs.bytes, bs.length, now / 30, code, sizeof(code));
 
     fprintf(stdout, "%s\n", code);
 
