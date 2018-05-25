@@ -112,6 +112,7 @@ get_token_from_file(const char *filename) {
     }
 
     byte_count = fread(buf, sizeof(char), sizeof(buf) - 1, tokenfile);
+    fclose(tokenfile);
     if (!byte_count) {
         bail("unable to read token file:");
     }
