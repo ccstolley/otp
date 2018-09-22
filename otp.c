@@ -102,7 +102,7 @@ get_token_from_file(const char *filename) {
     if (strchr(filename, '/') == NULL) {
         snprintf(path_buf, PATH_MAX, "%s/%s", DEFAULT_TOKEN_PATH, filename);
     } else {
-        strncpy(path_buf, filename, PATH_MAX);
+        snprintf(path_buf, PATH_MAX, "%s", filename);
     }
     check_perms(path_buf);
     tokenfile = fopen(path_buf, "r");
