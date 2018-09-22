@@ -131,6 +131,12 @@ int main(int argc, char *argv[])
     if (argc < 2) {
         bail("usage: otp [path/to/]tokenfile");
     }
+#ifdef __OpenBSD__
+   if (pledge("stdio rpath", NULL) == -1) {
+       bail("pledge");
+   }
+#endif
+
 
     token = get_token_from_file(argv[1]);
 
