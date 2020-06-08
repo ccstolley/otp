@@ -116,6 +116,7 @@ get_token_from_file(const char *filename) {
     if (!byte_count) {
         bail("unable to read token file:");
     }
+    buf[byte_count] = '\0';
     trim(buf);
     return strdup(buf);
 }
