@@ -18,7 +18,7 @@ all: otp
 	${CC} -c ${CFLAGS} $<
 
 otp: ${OBJ}
-	${CC} -o $@ ${LDFLAGS} ${OBJ} 
+	${CC} -o $@ $(OBJ) ${LDFLAGS}
 
 clean:
 	@echo cleaning
