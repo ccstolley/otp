@@ -3,6 +3,7 @@
 #include <ctype.h>
 #include <errno.h>
 #include <sys/stat.h>
+#include <assert.h>
 
 #include <openssl/hmac.h>
 
@@ -53,14 +54,18 @@ hotp(const unsigned char *sbytes, const size_t sbytes_len,
      const time_t movingFactor, char *code, const size_t code_len)
 {
     unsigned char data[8];
+    unsigned char md[EVP_MAX_MD_SIZE] = {0};
+    unsigned int md_len = sizeof(md);
     int i, offset, bin_code, otp;
 
     for (i = 0; i < 8; i++) {
         data[i] = i < 4 ? 0 : movingFactor >> (56 - 8*i);
     }
     unsigned char *r = HMAC(EVP_sha1(), sbytes, sbytes_len,
-                            data, sizeof(data), NULL, NULL);
+                            data, sizeof(data), md, &md_len);
+    assert(r);
     offset = r[19] & 0xf;
+    assert(offset + 3 < (signed)md_len);
     bin_code = ((r[offset] << 24) | (r[offset+1] << 16) |
                 (r[offset+2] << 8) | r[offset+3]) & 0x7fffffff;
     otp = bin_code % 1000000;
