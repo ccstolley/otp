@@ -7,7 +7,7 @@ LIBS = -lcrypto
 DEFINES = -DVERSION=\"${VERSION}\" -DDEFAULT_TOKEN_PATH=\"${PWD}/tokens\"
 CFLAGS = -std=gnu99 -fstack-protector-all -fbounds-check -pedantic -Wall -Wextra ${INCS} ${DEFINES} -g
 LDFLAGS = ${LIBS}
-CC = gcc
+CC = clang
 
 SRC = otp.c
 OBJ = ${SRC:.c=.o}
