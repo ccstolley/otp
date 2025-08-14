@@ -20,6 +20,10 @@ all: otp
 otp: ${OBJ}
 	${CC} -o $@ $(OBJ) ${LDFLAGS}
 
+fmt: otp.c
+	clang-format -i otp.c
+
+
 clean:
 	@echo cleaning
 	@rm -f otp ${OBJ} *.core
