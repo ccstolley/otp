@@ -95,18 +95,24 @@ static char *get_token_from_file(const char *filename) {
   size_t byte_count;
 
   bzero(buf, sizeof(buf));
-  bzero(path_buf, sizeof(path_buf));
 
-  if (strchr(filename, '/') == NULL) {
-    snprintf(path_buf, PATH_MAX, "%s/%s", DEFAULT_TOKEN_PATH, filename);
+  if (0 == strcmp(filename, "-")) {
+    tokenfile = stdin;
   } else {
-    snprintf(path_buf, PATH_MAX, "%s", filename);
-  }
-  check_perms(path_buf);
-  tokenfile = fopen(path_buf, "r");
-  if (!tokenfile) {
-    fprintf(stderr, "bad token file: %s\n", path_buf);
-    bail("can't open token file:");
+
+    bzero(path_buf, sizeof(path_buf));
+
+    if (strchr(filename, '/') == NULL) {
+      snprintf(path_buf, PATH_MAX, "%s/%s", DEFAULT_TOKEN_PATH, filename);
+    } else {
+      snprintf(path_buf, PATH_MAX, "%s", filename);
+    }
+    check_perms(path_buf);
+    tokenfile = fopen(path_buf, "r");
+    if (!tokenfile) {
+      fprintf(stderr, "bad token file: %s\n", path_buf);
+      bail("can't open token file:");
+    }
   }
 
   byte_count = fread(buf, sizeof(char), sizeof(buf) - 1, tokenfile);
@@ -126,7 +132,7 @@ int main(int argc, char *argv[]) {
   time_t now;
 
   if (argc < 2) {
-    bail("usage: otp [path/to/]tokenfile");
+    bail("usage: otp [path/to/]tokenfile | -");
   }
 #ifdef __OpenBSD__
   if (pledge("stdio rpath", NULL) == -1) {

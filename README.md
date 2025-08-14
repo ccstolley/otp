@@ -20,6 +20,6 @@ chmod 0600 tokens/footoken
 
 FAQ
 --
-1. Shouldn't you encrypt the tokens? Yes. But this program doesn't. Sorry.
+1. Shouldn't you encrypt the tokens? Probably. Use `otp -` to read keys from stdin if you want avoid storing them in plaintext on disk.
 2. What about QR codes? You'll need to solve that with [other software](https://github.com/dlbeer/quirc). Sorry.
 3. Where do my tokens go? See Makefile.
